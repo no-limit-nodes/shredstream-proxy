@@ -17,6 +17,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Debian 11 left the regular mirrors at end of life (2026-08); its packages
+      # now live on archive.debian.org. Keep bullseye for the glibc 2.31 floor.
+      - name: Use the Debian 11 archive
+        run: |
+          printf '%s\n' \
+            'deb http://archive.debian.org/debian bullseye main' \
+            'deb http://archive.debian.org/debian-security bullseye-security main' \
+            > /etc/apt/sources.list
+          rm -f /etc/apt/sources.list.d/*
+          echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99archive
+
       - name: Install build tools
         run: apt-get update -qq && apt-get install -y -qq ca-certificates libssl-dev protobuf-compiler pkg-config libudev-dev zlib1g-dev llvm clang cmake make libprotobuf-dev g++ binutils >/dev/null
 
