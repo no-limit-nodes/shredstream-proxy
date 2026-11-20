@@ -1,0 +1,9 @@
+NoLimitNodes ShredStream Proxy
+
+This product is a modified version of jito-labs/shredstream-proxy
+(https://github.com/jito-labs/shredstream-proxy), Copyright Jito Labs,
+licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Changes from the upstream version: removal of the end-of-life kill switch,
+vendored protos, a larger default UDP receive buffer, Alpenglow / transaction
+v1 deshred support, documentation, startup message and release workflows.

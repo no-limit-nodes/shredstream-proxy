@@ -1,0 +1,29 @@
+name: build
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: ./.github/actions/setup-rust
+        with:
+          caller-workflow-name: test
+
+      - name: Clippy check
+        run: cargo clippy --all-features --all-targets --tests -- -D warnings
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker build (no push)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: nln-shredstream-proxy:${{ github.sha }}

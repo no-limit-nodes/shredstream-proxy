@@ -1,0 +1,40 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-22.04
+    # Debian 11 (glibc 2.31) so the binary runs on Ubuntu 20.04+ / Debian 11+.
+    container: rust:1.84-bullseye
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: apt-get update -qq && apt-get install -y -qq ca-certificates libssl-dev protobuf-compiler pkg-config libudev-dev zlib1g-dev llvm clang cmake make libprotobuf-dev g++ >/dev/null
+
+      - name: Build (generic x86-64, no AVX2 needed)
+        env:
+          RUSTFLAGS: -C target-cpu=x86-64
+        run: cargo build --release --locked --bin jito-shredstream-proxy
+
+      - name: Package
+        run: |
+          f=jito-shredstream-proxy-x86_64-unknown-linux-gnu
+          cp target/release/jito-shredstream-proxy "$f"
+          sha256sum "$f" > "$f.sha256"
+          ls -lh "$f"
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ./jito-shredstream-proxy-x86_64-unknown-linux-gnu
+            ./jito-shredstream-proxy-x86_64-unknown-linux-gnu.sha256
